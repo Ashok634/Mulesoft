@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="95067c63-3d11-4412-83f9-65bf9ee5864c" >
+		<http:listener-connection host="localhost" port="8081" />
+	</http:listener-config>
+	<flow name="choice_routerFlow" doc:id="2ddefbd4-b50e-4335-8696-b5ebb42e9c83" >
+		<http:listener doc:name="Listener" doc:id="0ddab230-6534-4712-94a4-6316d09ec24a" config-ref="HTTP_Listener_config" path="/route"/>
+		<ee:transform doc:name="username" doc:id="9dc62227-3a70-4fc5-990d-bdd9f9e1b556">
+			<ee:message>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="username"><![CDATA[%dw 2.0
+output application/json
+---
+attributes.queryParams.username
+]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="f54c637e-a4e1-48a4-9967-7c58343ff058" message="##### # username name is recived #[vars.username]"/>
+		<ee:transform doc:name="Transform Message" doc:id="274e6385-2df7-4b21-a205-dd0ffd5d3ceb" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	Response:vars.username
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<choice doc:name="Check the Student Course" doc:id="2399891e-86b0-481a-8127-24810c77c0b7" >
+			<when expression="#[vars.username=='Mule']">
+				<logger level="INFO" doc:name="Logger" doc:id="2ce59e6e-7b76-4f1d-a230-1e41bc809895" message="#######WelCome to MuleSoft Traninng"/>
+				<ee:transform doc:name="Transform Message" doc:id="9baa5b5f-d51b-41b4-a60f-141b15a72464" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	Message:"MuleSoft Course Page"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<when expression="#[vars.username=='Sharepoint']">
+				<logger level="INFO" doc:name="Logger" doc:id="7991b830-426e-4eb6-b401-6d2d9f1b322b" message="######WelCome to Sharepoint  Trainnig"/>
+				<ee:transform doc:name="Transform Message" doc:id="37acace8-09ac-4b9b-a25d-2afacdf0b5a4" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+"Share Point page"]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Logger" doc:id="49f98a72-f6cf-4715-b924-1373845e5a73" message="####@@You are Complete the Study"/>
+				<ee:transform doc:name="Transform Message" doc:id="6be5f546-902b-4a08-a5f0-a9813cf6ca01" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+"Please Select  our Providing  Cources only"]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+	</flow>
+</mule>
